@@ -1,0 +1,87 @@
+idea: if we are using a daemon that records x clipboard
+and selection history, we should be able to search for it in
+a similar fashion as ctrl-r for bash.
+
+'ll use \C-h (ctrl-h, yes that is used by delete by deftault
+which i never use) 
+
+I could type: cd <hit ctrl-h> and it would present to
+me the last thing in the paste history. hitting it
+again would be the next to laste thing,etc. Arrow
+key, return, etc to select. 
+
+
+Close:
+https://gist.github.com/1169093
+
+bids \e-y to "xyank" which uses xclip to insert the
+current clipboard selection into the cli.
+
+But, this isn't a history, just the current selection.
+
+
+Other approachs that didn't really work...
+
+Trying to use ctrl-r (and/or whatever is bind'ed to 
+reverse-history-search) in a subshell with a diffferent
+HISTFILE search set
+
+Cons: doesn't seem to work. And readline/inputrc doesnt
+seem to like the idea of using a command _and_ calling
+a readline function (reverse-history-search) in this
+case. (see
+http://stackoverflow.com/questions/582726/alternate-way-to-trigger-reverse-i-search-without-pressing-ctrlr-in-bash
+for an answer that seems to agree with this)
+
+
+Another approch was to try to use bash completion,in a way that
+would cycle though the paste history. using menu-complete is
+close, but bash completion really wants a context to use for
+completion (or fallback to the completion for anything). 
+
+Ideally, we would do menu-complete for a specific readline
+keybinding, but this also doesnt seem to be possible. 
+
+Tried to simulate tab competing on something, and using custom
+completion that could search the history, but that has the 
+problem of also completing whatever was the completion target
+and echo'ing it to the line.
+
+
+other ideas:
+    rlwrap?
+
+    http://stackoverflow.com/questions/5003530/bash-script-how-to-implement-your-own-history-mechanism
+
+
+# use COMP_KEYS and COMP_TYPE to tell a "menu-complete" with
+a new keybinding from a tab. adds a default and everything
+completer and falls back if not the right key
+
+_clips() {
+     cat ~/.local/clipbored/clips | grep "$cur"
+}
+
+_clipboard(){
+    local cur prev words cword
+
+    #echo "comp_key" $COMP_KEY
+    #echo "comp type" $COMP_TYPE
+    # we want to tell the diff between a completion
+    # invoke via "TAB" and the keybinding mapped
+    # to clipboard completion (let's say, \C-h for
+    # example. If we are the clipboard config, we
+    # search the clipboard history, otherwise we
+    # just pass to the default completion here
+    if [ $COMP_KEY == 9 ] ; then
+        if [ $COMP_TYPE == 37 ] ; then
+            #COMPREPLY=( abba babba cabba dabba easy foobar glippy )
+            COMPREPLY=( $( compgen -C _clips -- "$cur") )
+        fi
+    fi
+}
+
+# complete on empty so we can paste an
+# entire command
+#complete -E -o default _clipboard
+

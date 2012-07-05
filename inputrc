@@ -1,0 +1,5 @@
+
+# or use menu-complete-backwards in
+# bash > 4.1
+"\C-o":menu-complete
+"\C-l":"\e--\C-o"
