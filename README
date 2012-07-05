@@ -1,0 +1,41 @@
+Experimenting with a bash-completion support
+for reading from the clipboard history
+
+Goal is to add a keybinding for sorting
+through the clipboard history and insert
+it in place. 
+
+Ideally, this would work similar to
+"ctrl-r" style history completion, except
+checking the clipboard history. 
+
+However, at the moment, there is no support
+for custom history style commands, so
+we add a hook for using "menu-complete"
+which is reasonably close. 
+
+The inputrc binds this to ctrl-l. 
+
+Menu style completion (menu-complete)
+seems to work much better for this than
+the default "complete" style completion,
+so we try to use that. A wrinkle there
+is that bash does not currently support
+specifing the completion type on...
+
+At the moment, it only works with the history
+file from the "clipbored" clipboard history
+app (https://github.com/trapd00r/clipbored).
+Mostly that is because it was the easiest
+format to parse. Support for others
+(parcellite, gclipper, klipper, etc) could
+be added.
+
+To use: add contents of inputrc to your
+.inputc and reload (cltr-x ctrl-r). Then
+`source clipboard_completions.sh`.
+
+"ctrl-l" on an empty line should insert
+the last entry from the "clipbored" history
+file. Hitting it again will cycle though
+the history.
